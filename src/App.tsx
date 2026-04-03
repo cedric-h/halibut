@@ -3,8 +3,8 @@ import React from 'react'
 
 import RoomCounter from "./RoomCounter.tsx"
 
-import bg1 from './assets/bg1.png'
-import bg3 from './assets/bg3.png'
+import bg1 from './assets/bg_brewery.png'
+import bg3 from './assets/bg_inventory.png'
 
 function Room({ children, bg }: { bg: string, children: React.ReactNode }) {
     return <div className="room">

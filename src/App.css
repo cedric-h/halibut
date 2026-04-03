@@ -20,7 +20,7 @@
           position: absolute;
           z-index: -1;
           width: calc(100% + 2 * var(--main-content-pad));
-          top: calc(-1 * var(--main-content-pad));
+          top: calc(-1 * var(--main-content-pad) - 4rem);
           left: calc(-1 * var(--main-content-pad));
       }
   }

@@ -1,4 +1,4 @@
-import bg2 from './assets/bg2.png'
+import bg2 from './assets/bg_counter.png'
 
 export default function RoomCounter() {
     return <div className="room">
