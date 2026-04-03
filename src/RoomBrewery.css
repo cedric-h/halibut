@@ -1,0 +1,15 @@
+.spigot-holder {
+    margin-top: 3.8rem;
+    margin-left: 0.8rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+
+    .spigot-row {
+        .spigot {
+            width: 2.0rem;
+            margin-right: -0.3rem;
+        }
+    }
+}

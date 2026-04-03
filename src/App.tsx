@@ -1,24 +1,16 @@
 import './App.css'
 import React from 'react'
 
+import RoomBrewery from "./RoomBrewery.tsx"
 import RoomCounter from "./RoomCounter.tsx"
-
-import bg1 from './assets/bg_brewery.png'
-import bg3 from './assets/bg_inventory.png'
-
-function Room({ children, bg }: { bg: string, children: React.ReactNode }) {
-    return <div className="room">
-        <img className="room-bg" src={bg}></img>
-        {children}
-    </div>
-}
+import RoomInventory from "./RoomInventory.tsx"
 
 export default function App() {
-    const [idx, setIdx] = React.useState(2);
+    const [idx, setIdx] = React.useState(0);
     const allTabs = [
-        <Room key={0} bg={bg1}> </Room>,
+        <RoomBrewery key={0}/>,
         <RoomCounter key={1}/>,
-        <Room key={2} bg={bg3}> </Room>
+        <RoomInventory key={2}/>
     ];
     const tabs = Array.from({ length: 3 }, (_, i) => allTabs[(i + idx) % 3]);
 
