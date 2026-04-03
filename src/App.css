@@ -19,7 +19,7 @@
       .room-bg {
           position: absolute;
           z-index: -1;
-          height: calc(100% + 2 * var(--main-content-pad));
+          width: calc(100% + 2 * var(--main-content-pad));
           top: calc(-1 * var(--main-content-pad));
           left: calc(-1 * var(--main-content-pad));
       }

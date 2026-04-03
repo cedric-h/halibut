@@ -1,21 +1,26 @@
 import './App.css'
 import React from 'react'
 
-function Room({ children }: { children: React.ReactNode }) {
+import RoomCounter from "./RoomCounter.tsx"
+
+import bg1 from './assets/bg1.png'
+import bg3 from './assets/bg3.png'
+
+function Room({ children, bg }: { bg: string, children: React.ReactNode }) {
     return <div className="room">
+        <img className="room-bg" src={bg}></img>
         {children}
     </div>
 }
 
 export default function App() {
-    const [idx, setIdx] = React.useState(0);
+    const [idx, setIdx] = React.useState(2);
     const allTabs = [
-        <Room key={0}> <h1> hi 0 </h1> </Room>,
-        <Room key={1}> <h1> hi 1 </h1> </Room>,
-        <Room key={2}> <h1> hi 2 </h1> </Room>
+        <Room key={0} bg={bg1}> </Room>,
+        <RoomCounter key={1}/>,
+        <Room key={2} bg={bg3}> </Room>
     ];
     const tabs = Array.from({ length: 3 }, (_, i) => allTabs[(i + idx) % 3]);
-    console.log(idx, Array.from({ length: 3 }, (_, i) => (i + idx) % 3));
 
     return <div
         className="main-content"
