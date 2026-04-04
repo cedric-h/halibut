@@ -4,12 +4,59 @@
 
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+    gap: 1.5rem;
 
-    .spigot-row {
-        .spigot {
-            width: 2.0rem;
-            margin-right: -0.3rem;
+    .spigot-shelf {
+        
+        &:not(.flip) > .spigot-row {
+            .brew-station:last-child {
+                .spigot {
+                    content: url("assets/spigot_end.png")
+                }
+            }
+        }
+        &.flip > .spigot-row {
+            .spigot { translate: 0.7rem 0; }
+            .brew-station:first-child {
+                .spigot {
+                    content: url("assets/spigot_end.png")
+                }
+            }
+        }
+
+
+        &.flip {
+            .spigot {
+                scale: -1 1;
+            }
+        }
+
+        .spigot-row {
+            display: flex;
+            flex-direction: row;
+
+            .brew-station {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                gap: 0.4rem;
+
+                margin-right: -0.4rem;
+                .spigot {
+                    width: 2.0rem;
+                }
+                .drink {
+                    position: relative;
+                    width: 1.5rem;
+                    margin-left: 0.7rem;
+                }
+
+            }
+        }
+
+        .shelf {
+            margin-top: -0.4rem;
+            width: 12rem;
         }
     }
 }
