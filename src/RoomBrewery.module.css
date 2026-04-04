@@ -1,0 +1,147 @@
+@keyframes drink-bubble-forty {
+    from { content: url('./assets/glass_40p_1.png'); }
+    to { content: url('./assets/glass_40p_2.png'); }
+}
+@keyframes drink-bubble-eighty {
+    from { content: url('./assets/glass_80p_1.png'); }
+    to { content: url('./assets/glass_80p_2.png'); }
+}
+@keyframes drink-brew {
+    from { rotate: -2deg; }
+    to { rotate: 8deg; }
+}
+
+@keyframes tank-brew {
+    from { translate: 0 0; }
+    50% { translate: 0 -0.2rem; }
+    to { translate: 0 0.2rem; }
+}
+
+.room-brewery {
+    --tank-brew: 1s linear infinite alternate tank-brew;
+    .tank {
+        position: relative;
+        height: 2.7rem;
+        margin-left: -0.4rem;
+        animation: var(--tank-brew);
+
+        .part-tank {
+            height: 3rem;
+            position: relative;
+            z-index: -1;
+            margin-left: -0.5rem;
+            margin-top: -1.0rem;
+            content: url('./assets/brew_tank.png');
+        }
+
+        .part-arm {
+            position: absolute;
+            z-index: -1;
+            top: 1rem;
+            left: 0.5rem;
+            width: 1rem;
+            content: url('./assets/brew_tank_arm.png');
+        }
+
+        .part-L {
+            position: absolute;
+            z-index: -1;
+            top: -2.8rem;
+            left: 4.7rem;
+            height: 4rem;
+            content: url('./assets/brew_tank_L.png');
+        }
+
+    }
+
+    .tank-part-connector {
+        animation: var(--tank-brew);
+
+        position: absolute;
+        z-index: 1;
+        right: 0rem;
+        top: 3.0rem;
+        height: 9.5rem;
+        content: url('./assets/brew_tank_connector.png');
+    }
+
+    .spigot-holder {
+        margin-left: 0.8rem;
+
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+
+        .spigot-shelf {
+            
+            &.flip {
+                .spigot {
+                    translate: 0.7rem 0; 
+                    scale: -1 1;
+                }
+            }
+
+            .spigot-row {
+                display: flex;
+                flex-direction: row;
+
+                .brew-station {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    gap: 0.4rem;
+
+                    margin-right: -0.4rem;
+                    .spigot {
+                        animation: var(--tank-brew);
+                        animation-composition: add;
+                        content: url('./assets/spigot_connector.png');
+
+                        &.outline {
+                            content: url('./assets/spigot_outline.png');
+                            &:hover {
+                                animation: var(--tank-brew), var(--happy-wobble);
+                            }
+                        }
+
+                        width: 2.0rem;
+                    }
+                    .drink {
+
+                        &.done:hover {
+                            animation: var(--happy-wobble);
+                        }
+
+                        &.glass0 { content: url('./assets/glass_0p.png'); }
+                        &.boba { content: url('./assets/boba.png'); }
+                        &.outline { content: url('./assets/glass_outline.png'); }
+
+                        --drink-brew: 0.5s cubic-bezier(0.65, 0.05, 0.36, 1) infinite alternate drink-brew;
+                        &.glass40 {
+                            animation:
+                                var(--drink-brew),
+                                0.5s linear infinite alternate drink-bubble-forty
+                                ;
+                        }
+                        &.glass80 {
+                            animation:
+                                var(--drink-brew),
+                                0.5s linear infinite alternate drink-bubble-eighty
+                                ;
+                        }
+                        position: relative;
+                        width: 1.5rem;
+                        margin-left: 0.7rem;
+                    }
+
+                }
+            }
+
+            .shelf {
+                content: url('./assets/brew_shelf.png');
+                margin-top: -0.4rem;
+                width: 12rem;
+            }
+        }
+    }
+}
