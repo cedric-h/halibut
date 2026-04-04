@@ -1,5 +1,5 @@
 
-import css from './RoomBrewery.module.css'
+import './RoomBrewery.css'
 import bg from './assets/bg_brewery.png'
 
 enum BruRecipe {
@@ -28,14 +28,14 @@ namespace BruRecipe {
     export function art(recipe: BruRecipe, state: State): string {
         switch (recipe) {
             case BruRecipe.None:
-                return css.glass0;
+                return "glass0";
 
             case BruRecipe.Boba:
                 switch (state) {
-                    case State.Empty: return css.glass0;
-                    case State.Brewing0: return css.glass0;
-                    case State.Brewing1: return css.glass80;
-                    case State.Brewed: return css.boba;
+                    case State.Empty: return "glass0";
+                    case State.Brewing0: return "glass40";
+                    case State.Brewing1: return "glass80";
+                    case State.Brewed: return "boba";
                 }
         }
     }
@@ -75,21 +75,21 @@ function SpigotRow(
         })();
 
         const art = BruRecipe.art(slot.recipe, state);
-        const done = (state == BruRecipe.State.Brewed) ? css.done : '';
-        return <div className={css.brewStation}>
-            <img className={css.spigot}/>
-            <img className={[css.drink, art, done].join(' ')}/>
+        const done = (state == BruRecipe.State.Brewed) ? 'done' : '';
+        return <div className="brew-station">
+            <img className="spigot"/>
+            <img className={["drink", art, done].join(' ')}/>
         </div>
     }
 
     function BruStationOutline() {
-        return <div className={css.brewStation}>
-            <img className={[css.spigot, css.outline].join(' ')}/>
-            <img className={[css.drink, css.outline].join(' ')}/>
+        return <div className="brew-station">
+            <img className="spigot outline"/>
+            <img className="drink outline"/>
         </div>
     }
 
-    return <div className={css.spigotRow}>
+    return <div className="spigot-row">
         {row.slots.map((x, i) => {
             return <BruStation key={i} slot={x}/>
         })}
@@ -137,20 +137,20 @@ export default function RoomBrewery() {
             ]
         },
     ]; 
-    return <div className={["room", css.roomBrewery].join(' ')}>
+    return <div className="room room-brewery">
         <img className="room-bg" src={bg}/>
 
-        <div className={css.tank}>
-            <img className={css.partL}/>
-            <img className={css.partTank}/>
-            <img className={css.partArm}/>
+        <div className="tank">
+            <img className="part-L"/>
+            <img className="part-tank"/>
+            <img className="part-arm"/>
         </div>
 
-        <div className={css.spigotHolder}>
+        <div className="spigot-holder">
 
-            <div className={css.spigotShelf}>
+            <div className="spigot-shelf">
                 <SpigotRow row={rows[0]}/>
-                <img className={css.shelf}/>
+                <img className="shelf"/>
             </div>
 
             {/*
@@ -162,7 +162,7 @@ export default function RoomBrewery() {
         </div>
 
         {(rows[0].slots.length == rows[0].maxCount) &&
-                <img className={css.tankPartConnector}/>}
+                <img className="tank-part-connector"/>}
     </div>
 }
 
