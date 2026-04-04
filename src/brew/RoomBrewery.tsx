@@ -1,6 +1,8 @@
+import { useTimeout } from 'src/hooks.ts'
+import React from 'react'
 
 import './RoomBrewery.css'
-import bg from './assets/bg_brewery.png'
+import bg from 'src/assets/bg_brewery.png'
 
 enum BruRecipe {
     None,
@@ -52,21 +54,27 @@ type BruSlotRow = {
 }
 
 function SpigotRow(
-    { row }: {
+    { row, dispatch }: {
         row: BruSlotRow,
+        dispatch: React.ActionDispatch<[_: undefined]>,
     }
 ) {
     function BruStation({ slot }: { slot: BruSlot }) {
-        const state = (() => {
+        const [_, rerender] = React.useReducer(n => n + 1, 0);
 
+        const duration = BruRecipe.duration(slot.recipe);
+        const remaining = slot.done - Date.now();
+        const elapsed = duration - remaining;
+
+        console.log((remaining > 0) ? remaining : null);
+        useTimeout(() => rerender(), (remaining > 0) ? remaining : null);
+
+        const state = (() => {
             if (slot.recipe == BruRecipe.None)
                 return BruRecipe.State.Empty;
 
             if (slot.done < Date.now())
                 return BruRecipe.State.Brewed;
-
-            const duration = BruRecipe.duration(slot.recipe);
-            const elapsed = duration - (slot.done - Date.now());
 
             if ((elapsed/duration) < 0.4)
                 return BruRecipe.State.Brewing0;
@@ -84,7 +92,7 @@ function SpigotRow(
 
     function BruStationOutline() {
         return <div className="brew-station">
-            <img className="spigot outline"/>
+            <img onClick={() => dispatch(undefined)} className="spigot outline"/>
             <img className="drink outline"/>
         </div>
     }
@@ -96,47 +104,36 @@ function SpigotRow(
         {(row.slots.length != row.maxCount) &&
                 <BruStationOutline/>}
     </div>
-
-    // return <div className="spigot-row">
-    //     <div className="brew-station">
-    //         <img className="spigot"/>
-    //         <img className="drink" src={glass0}/>
-    //     </div>
-    //     <div className="brew-station">
-    //         <img className="spigot"/>
-    //         <img className="drink wobble40" src={glass40}/>
-    //     </div>
-    //     <div className="brew-station">
-    //         <img className="spigot"/>
-    //         <img className="drink wobble80" src={glass80}/>
-    //     </div>
-    //     <div className="brew-station">
-    //         <img className="spigot"/>
-    //         <img className="drink" src={boba}/>
-    //     </div>
-    //     <div className="brew-station">
-    //         <img className="spigot"/>
-    //         <img className="drink" src={boba}/>
-    //     </div>
-    //     <div className="brew-station">
-    //         <img className="spigot"/>
-    //         <img className="drink" src={boba}/>
-    //     </div>
-    // </div>
 }
 
 export default function RoomBrewery() {
-    const rows = [
-        {
-            maxCount: 7,
-            slots: [
-                { recipe: BruRecipe.Boba, done: Date.now() },
-                { recipe: BruRecipe.Boba, done: Date.now() + 10_000 },
-                { recipe: BruRecipe.Boba, done: Date.now() +  2_000 },
-                { recipe: BruRecipe.Boba, done: 0 },
-            ]
+    const [rows, dispatch] = React.useReducer(
+        (rows: BruSlotRow[], _: undefined) => {
+            return [
+                {
+                    ...rows[0],
+                    slots: [
+                        ...rows[0].slots,
+                        { recipe: BruRecipe.None, done: Date.now() + 1000 },
+                    ]
+                }
+            ];
         },
-    ]; 
+        [
+            {
+                maxCount: 7,
+                slots: [
+                    { recipe: BruRecipe.Boba, done: Date.now() },
+                    { recipe: BruRecipe.Boba, done: Date.now() + 10_000 },
+                    { recipe: BruRecipe.Boba, done: Date.now() +  2_000 },
+                    { recipe: BruRecipe.None, done: Date.now() +  2_000 },
+                    { recipe: BruRecipe.Boba, done: 0 },
+                ]
+            },
+        ]
+    ); 
+    console.log(rows);
+
     return <div className="room room-brewery">
         <img className="room-bg" src={bg}/>
 
@@ -149,7 +146,7 @@ export default function RoomBrewery() {
         <div className="spigot-holder">
 
             <div className="spigot-shelf">
-                <SpigotRow row={rows[0]}/>
+                <SpigotRow dispatch={dispatch} row={rows[0]}/>
                 <img className="shelf"/>
             </div>
 
