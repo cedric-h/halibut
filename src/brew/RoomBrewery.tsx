@@ -9,7 +9,7 @@ enum BruRecipe {
     Boba,
 }
 namespace BruRecipe {
-    export enum State {
+    export enum Stage {
         Empty,
         Brewing0,
         Brewing1,
@@ -27,17 +27,17 @@ namespace BruRecipe {
     }
 
     /* returns CSS class name */
-    export function art(recipe: BruRecipe, state: State): string {
+    export function art(recipe: BruRecipe, state: Stage): string {
         switch (recipe) {
             case BruRecipe.None:
                 return "glass0";
 
             case BruRecipe.Boba:
                 switch (state) {
-                    case State.Empty: return "glass0";
-                    case State.Brewing0: return "glass40";
-                    case State.Brewing1: return "glass80";
-                    case State.Brewed: return "boba";
+                    case Stage.Empty: return "glass0";
+                    case Stage.Brewing0: return "glass40";
+                    case Stage.Brewing1: return "glass80";
+                    case Stage.Brewed: return "boba";
                 }
         }
     }
@@ -46,93 +46,146 @@ namespace BruRecipe {
 type BruSlot = {
     recipe: BruRecipe,
     done: number, /* Date.now timestamp */
+    id: number,
+    nu: boolean,
 }
 
 type BruSlotRow = {
     slots: BruSlot[],
-    maxCount: number,
+    full: boolean,
 }
 
-function SpigotRow(
+function DrinkRow(
     { row, dispatch }: {
         row: BruSlotRow,
-        dispatch: React.ActionDispatch<[_: undefined]>,
+        dispatch: React.ActionDispatch<[_: BruEvent]>,
     }
 ) {
-    function BruStation({ slot }: { slot: BruSlot }) {
+    function Drink({ slot }: { slot: BruSlot }) {
         const [_, rerender] = React.useReducer(n => n + 1, 0);
 
         const duration = BruRecipe.duration(slot.recipe);
         const remaining = slot.done - Date.now();
         const elapsed = duration - remaining;
 
-        console.log((remaining > 0) ? remaining : null);
         useTimeout(() => rerender(), (remaining > 0) ? remaining : null);
 
         const state = (() => {
             if (slot.recipe == BruRecipe.None)
-                return BruRecipe.State.Empty;
+                return BruRecipe.Stage.Empty;
 
             if (slot.done < Date.now())
-                return BruRecipe.State.Brewed;
+                return BruRecipe.Stage.Brewed;
 
             if ((elapsed/duration) < 0.4)
-                return BruRecipe.State.Brewing0;
+                return BruRecipe.Stage.Brewing0;
             else
-                return BruRecipe.State.Brewing1;
+                return BruRecipe.Stage.Brewing1;
         })();
 
         const art = BruRecipe.art(slot.recipe, state);
-        const done = (state == BruRecipe.State.Brewed) ? 'done' : '';
-        return <div className="brew-station">
-            <img className="spigot"/>
-            <img className={["drink", art, done].join(' ')}/>
-        </div>
+        const nu = slot.nu ? "new " : "";
+
+        let drink = <img className={"drink " + nu + art}/>;
+        if (state == BruRecipe.Stage.Brewed) {
+            drink = <img
+                className={"drink done " + nu + art}
+                onClick={() => dispatch({
+                    kind: BruEventKind.CollectDrink,
+                    id: slot.id,
+                })}
+            />
+        }
+
+        return drink;
     }
 
-    function BruStationOutline() {
-        return <div className="brew-station">
-            <img onClick={() => dispatch(undefined)} className="spigot outline"/>
-            <img className="drink outline"/>
-        </div>
-    }
+    // function BruStationOutline() {
+    //     return <div className="brew-station">
+    //         <img
+    //             className="spigot outline"
+    //             onClick={() => dispatch({ kind: BruEventKind.BuySpigot })}
+    //         />
+    //         <img className="drink outline"/>
+    //     </div>
+    // }
+    // {(row.slots.length != row.maxCount) &&
+    //         <BruStationOutline/>}
 
-    return <div className="spigot-row">
+    return <>
         {row.slots.map((x, i) => {
-            return <BruStation key={i} slot={x}/>
+            return <Drink key={i} slot={x}/>
         })}
-        {(row.slots.length != row.maxCount) &&
-                <BruStationOutline/>}
-    </div>
+        {(!row.full) &&
+            <img className="drink outline"/>}
+    </>
 }
 
+enum BruEventKind {
+    BuySpigot,
+    CollectDrink,
+}
+type BruEvent = { kind: BruEventKind.BuySpigot } |
+                { kind: BruEventKind.CollectDrink, id: number };
+
 export default function RoomBrewery() {
-    const [rows, dispatch] = React.useReducer(
-        (rows: BruSlotRow[], _: undefined) => {
-            return [
-                {
-                    ...rows[0],
-                    slots: [
-                        ...rows[0].slots,
-                        { recipe: BruRecipe.None, done: Date.now() + 1000 },
-                    ]
-                }
-            ];
+    const [slots, dispatch] = React.useReducer(
+        (slots: BruSlot[], ev: BruEvent) => {
+            slots = slots.map(x => ({ ...x, nu: false }));
+
+            switch (ev.kind) {
+                case BruEventKind.BuySpigot:
+                    return [...slots, {
+                        recipe: BruRecipe.None,
+                        done: Date.now(),
+                        id: slots.length,
+                        nu: true,
+                    }];
+                case BruEventKind.CollectDrink:
+                    return slots.map(s => {
+                        if (s.id == ev.id)
+                            return {
+                                ...s,
+                                recipe: BruRecipe.None,
+                                done: Date.now(),
+                            };
+                        return s;
+                    });
+            }
         },
         [
             {
-                maxCount: 7,
-                slots: [
-                    { recipe: BruRecipe.Boba, done: Date.now() },
-                    { recipe: BruRecipe.Boba, done: Date.now() + 10_000 },
-                    { recipe: BruRecipe.Boba, done: Date.now() +  2_000 },
-                    { recipe: BruRecipe.None, done: Date.now() +  2_000 },
-                    { recipe: BruRecipe.Boba, done: 0 },
-                ]
+                id: 1,
+                recipe: BruRecipe.Boba,
+                done: Date.now()+10_000*Math.random(),
+                nu: true,
             },
         ]
     ); 
-    console.log(rows);
+
+    const rows = [
+        {
+            full: slots.slice(0, 6).length == 6,
+            slots: slots.slice(0, 6),
+        },
+        {
+            full: slots.slice(6, 12).length == 6,
+            slots: slots.slice(6, 12),
+        }
+    ];
+
+    function SpigotRow({row}: { row: BruSlotRow }) {
+        return <>
+            {row.slots.map((_, i) => {
+                return <img key={i} className="spigot"/>
+            })}
+            {(!row.full) &&
+                <img
+                    className="spigot outline"
+                    onClick={() => dispatch({ kind: BruEventKind.BuySpigot })}
+                />}
+        </>
+    }
 
     return <div className="room room-brewery">
         <img className="room-bg" src={bg}/>
@@ -141,25 +194,38 @@ export default function RoomBrewery() {
             <img className="part-L"/>
             <img className="part-tank"/>
             <img className="part-arm"/>
+
+            <div className="spigot-row-wrapper">
+                <div className="spigot-row">
+                    <SpigotRow row={rows[0]}/>
+                </div>
+                {(rows[0].full) && <div className="spigot-row flip">
+                    <SpigotRow row={rows[1]}/>
+                </div>}
+            </div>
+
+            {(rows[0].full) && <img className="tank-part-connector"/>}
         </div>
 
         <div className="spigot-holder">
 
-            <div className="spigot-shelf">
-                <SpigotRow dispatch={dispatch} row={rows[0]}/>
-                <img className="shelf"/>
+            <div className="drink-shelf-wrapper">
+                <div className="drink-shelf">
+                    <div className="drink-row">
+                        <DrinkRow dispatch={dispatch} row={rows[0]}/>
+                    </div>
+                    <img className="shelf"/>
+                </div>
+                <div className="drink-shelf flip">
+                    <div className="drink-row">
+                        {(rows[0].full) &&
+                            <DrinkRow dispatch={dispatch} row={rows[1]}/>}
+                    </div>
+                    <img className="shelf"/>
+                </div>
             </div>
 
-            {/*
-            <div className="spigot-shelf flip">
-                <SpigotRow slots={[]}/>
-                <img className="shelf"/>
-            </div>*/}
-
         </div>
-
-        {(rows[0].slots.length == rows[0].maxCount) &&
-                <img className="tank-part-connector"/>}
     </div>
 }
 

@@ -1,14 +1,19 @@
 @keyframes drink-bubble-forty {
-    from { content: url('./assets/glass_40p_1.png'); }
-    to { content: url('./assets/glass_40p_2.png'); }
+    from { content: url('assets/glass_40p_1.png'); }
+    to { content: url('assets/glass_40p_2.png'); }
 }
 @keyframes drink-bubble-eighty {
-    from { content: url('./assets/glass_80p_1.png'); }
-    to { content: url('./assets/glass_80p_2.png'); }
+    from { content: url('assets/glass_80p_1.png'); }
+    to { content: url('assets/glass_80p_2.png'); }
 }
 @keyframes drink-brew {
     from { rotate: -2deg; }
     to { rotate: 8deg; }
+}
+@keyframes brew-slide-in {
+    from { transform: translateX(-10rem); opacity: 0; }
+    40% { opacity: 100% }
+    to { transform: translateX(0); }
 }
 
 @keyframes tank-brew {
@@ -31,7 +36,7 @@
             z-index: -1;
             margin-left: -0.5rem;
             margin-top: -1.0rem;
-            content: url('./assets/brew_tank.png');
+            content: url('assets/brew_tank.png');
         }
 
         .part-arm {
@@ -40,7 +45,7 @@
             top: 1rem;
             left: 0.5rem;
             width: 1rem;
-            content: url('./assets/brew_tank_arm.png');
+            content: url('assets/brew_tank_arm.png');
         }
 
         .part-L {
@@ -49,98 +54,119 @@
             top: -2.8rem;
             left: 4.7rem;
             height: 4rem;
-            content: url('./assets/brew_tank_L.png');
+            content: url('assets/brew_tank_L.png');
+        }
+
+        .spigot-row-wrapper {
+            gap: 6.2rem;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0.6rem;
+
+            .spigot-row {
+
+                &.flip {
+                    translate: -1.9rem 0; 
+                    scale: -1 1;
+                }
+                
+                &.flip {
+                    .spigot:last-child:not(.outline) {
+                        content: url('assets/spigot_end.png');
+                        rotate: 4deg;
+                    }
+                }
+
+                display: flex;
+                flex-direction: row;
+                margin-left: 1.4rem;
+
+                .spigot {
+                    margin-right: -0.2rem;
+                    width: 2.0rem;
+
+                    content: url('assets/spigot_connector.png');
+
+                    &.outline {
+                        content: url('assets/spigot_outline.png');
+                        &:hover {
+                            animation: var(--happy-wobble);
+                        }
+                    }
+                }
+            }
+        }
+
+        .tank-part-connector {
+            position: absolute;
+            z-index: 1;
+            right: -0.2rem;
+            top: 2.9rem;
+            height: 9.6rem;
+            content: url('assets/brew_tank_connector.png');
         }
 
     }
 
-    .tank-part-connector {
-        animation: var(--tank-brew);
 
-        position: absolute;
-        z-index: 1;
-        right: 0rem;
-        top: 3.0rem;
-        height: 9.5rem;
-        content: url('./assets/brew_tank_connector.png');
-    }
-
-    .spigot-holder {
+    .drink-shelf-wrapper {
         margin-left: 0.8rem;
+        margin-top: 2.8rem;
 
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 3.4rem;
 
-        .spigot-shelf {
-            
-            &.flip {
-                .spigot {
-                    translate: 0.7rem 0; 
-                    scale: -1 1;
-                }
-            }
-
-            .spigot-row {
-                display: flex;
-                flex-direction: row;
-
-                .brew-station {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    gap: 0.4rem;
-
-                    margin-right: -0.4rem;
-                    .spigot {
-                        animation: var(--tank-brew);
-                        animation-composition: add;
-                        content: url('./assets/spigot_connector.png');
-
-                        &.outline {
-                            content: url('./assets/spigot_outline.png');
-                            &:hover {
-                                animation: var(--tank-brew), var(--happy-wobble);
-                            }
-                        }
-
-                        width: 2.0rem;
-                    }
-                    .drink {
-
-                        &.done:hover {
-                            animation: var(--happy-wobble);
-                        }
-
-                        &.glass0 { content: url('./assets/glass_0p.png'); }
-                        &.boba { content: url('./assets/boba.png'); }
-                        &.outline { content: url('./assets/glass_outline.png'); }
-
-                        --drink-brew: 0.5s cubic-bezier(0.65, 0.05, 0.36, 1) infinite alternate drink-brew;
-                        &.glass40 {
-                            animation:
-                                var(--drink-brew),
-                                0.5s linear infinite alternate drink-bubble-forty
-                                ;
-                        }
-                        &.glass80 {
-                            animation:
-                                var(--drink-brew),
-                                0.5s linear infinite alternate drink-bubble-eighty
-                                ;
-                        }
-                        position: relative;
-                        width: 1.5rem;
-                        margin-left: 0.7rem;
-                    }
-
-                }
-            }
+        .drink-shelf {
 
             .shelf {
-                content: url('./assets/brew_shelf.png');
-                margin-top: -0.4rem;
+                content: url('assets/brew_shelf.png');
                 width: 12rem;
+            }
+
+            &.flip .drink-row {
+                margin-right: 2.6rem;
+                margin-left: 0rem;
+                flex-direction: row-reverse;
+            }
+            .drink-row {
+                margin-left: 1.1rem;
+            }
+
+            .drink-row {
+                display: flex;
+                gap: 0.25rem;
+                height: 3rem;
+                align-items: flex-end;
+                margin-bottom: -0.5rem;
+
+                .drink {
+                    &.new { animation: 0.2s linear brew-slide-in; }
+                    width: 1.5rem;
+                    position: relative;
+
+                    &.done:hover {
+                        animation: var(--happy-wobble);
+                    }
+
+                    &.glass0 { content: url('assets/glass_0p.png'); }
+                    &.boba { content: url('assets/boba.png'); }
+                    &.outline { content: url('assets/glass_outline.png'); }
+
+                    --drink-brew: 0.5s cubic-bezier(0.65, 0.05, 0.36, 1) infinite alternate drink-brew;
+                    &.glass40 {
+                        animation:
+                            var(--drink-brew),
+                            0.5s linear infinite alternate drink-bubble-forty
+                            ;
+                    }
+                    &.glass80 {
+                        animation:
+                            var(--drink-brew),
+                            0.5s linear infinite alternate drink-bubble-eighty
+                            ;
+                    }
+                }
             }
         }
     }
