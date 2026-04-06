@@ -5,7 +5,29 @@
     to { scale: 1.1; rotate: 0deg; }
 }
 
+@keyframes drink-collect-kickflip {
+      0% { translate:   0rem   0rem; }
+     30% { translate:   2rem  -2rem; }
+    100% { translate: -12rem  12rem; }
+}
+@keyframes drink-collect-spin {
+    from { rotate: 0deg; }
+    50% { rotate: 180deg; }
+    to { rotate: 360deg; }
+}
+
 .main-content {
+    .flying-item {
+        width: 1.5rem;
+        content: url('assets/boba.png');
+        position: absolute;
+        top: 0;
+        left: 0;
+        animation:
+            1.0s cubic-bezier(0.6, -0.28, 0.74, 0.05) drink-collect-kickflip forwards,
+            0.5s linear 0.3s infinite drink-collect-spin;
+    }
+
     --happy-wobble: 0.2s linear happy-wobble forwards;
 
     width: 100%;

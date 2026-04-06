@@ -10,7 +10,7 @@
     from { rotate: -2deg; }
     to { rotate: 8deg; }
 }
-@keyframes brew-slide-in {
+@keyframes drink-slide-in {
     from { transform: translateX(-10rem); opacity: 0; }
     40% { opacity: 100% }
     to { transform: translateX(0); }
@@ -141,19 +141,16 @@
                 margin-bottom: -0.5rem;
 
                 .drink {
-                    &.new { animation: 0.2s linear brew-slide-in; }
                     width: 1.5rem;
                     position: relative;
 
-                    &.done:hover {
-                        animation: var(--happy-wobble);
-                    }
+                    &.done:hover { animation: var(--happy-wobble); }
 
                     &.glass0 { content: url('assets/glass_0p.png'); }
                     &.boba { content: url('assets/boba.png'); }
                     &.outline { content: url('assets/glass_outline.png'); }
 
-                    --drink-brew: 0.5s cubic-bezier(0.65, 0.05, 0.36, 1) infinite alternate drink-brew;
+                    --drink-brew: 0.5s cubic-bezier(0.65, 0.05, 0.36, 1) var(--drink-brew-delay) infinite alternate drink-brew;
                     &.glass40 {
                         animation:
                             var(--drink-brew),
@@ -165,6 +162,14 @@
                             var(--drink-brew),
                             0.5s linear infinite alternate drink-bubble-eighty
                             ;
+                    }
+
+                    &.brew-wobble {
+                        animation: var(--drink-brew);
+                        &.new {
+                            --drink-slide-in: 0.2s linear drink-slide-in var(--drink-slide-in-delay);
+                            animation: var(--drink-slide-in);
+                        }
                     }
                 }
             }

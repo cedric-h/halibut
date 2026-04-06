@@ -1,4 +1,9 @@
+
+// so tsc won't yell about setting a css var in a style attr
+import 'src/types.d.ts'
+
 import { useTimeout } from 'src/hooks.ts'
+import { AppDispatchContext } from "src/AppDispatchContext.ts"
 import React from 'react'
 
 import './RoomBrewery.css'
@@ -13,6 +18,7 @@ namespace BruRecipe {
         Empty,
         Brewing0,
         Brewing1,
+        Brewing2,
         Brewed
     }
 
@@ -29,16 +35,18 @@ namespace BruRecipe {
     /* returns CSS class name */
     export function art(recipe: BruRecipe, state: Stage): string {
         switch (recipe) {
-            case BruRecipe.None:
-                return "glass0";
 
             case BruRecipe.Boba:
                 switch (state) {
-                    case Stage.Empty: return "glass0";
-                    case Stage.Brewing0: return "glass40";
-                    case Stage.Brewing1: return "glass80";
+                    case Stage.Empty: return "outline";
+                    case Stage.Brewing0: return "glass0 brew-wobble";
+                    case Stage.Brewing1: return "glass40";
+                    case Stage.Brewing2: return "glass80";
                     case Stage.Brewed: return "boba";
                 }
+
+            case BruRecipe.None:
+                return "outline";
         }
     }
 }
@@ -46,8 +54,8 @@ namespace BruRecipe {
 type BruSlot = {
     recipe: BruRecipe,
     done: number, /* Date.now timestamp */
+    nu: number, /* Date.now timestamp */
     id: number,
-    nu: boolean,
 }
 
 type BruSlotRow = {
@@ -63,41 +71,75 @@ function DrinkRow(
 ) {
     function Drink({ slot }: { slot: BruSlot }) {
         const [_, rerender] = React.useReducer(n => n + 1, 0);
+        const appDispatch = React.useContext(AppDispatchContext);
 
-        const duration = BruRecipe.duration(slot.recipe);
-        const remaining = slot.done - Date.now();
-        const elapsed = duration - remaining;
+        let [untilRerender, state] = (() => {
+            const duration = BruRecipe.duration(slot.recipe);
+            const remaining = slot.done - Date.now();
+            const brewStop0 = duration*0.2;
+            const brewStop1 = duration*0.7;
+            const elapsed = duration - remaining;
 
-        useTimeout(() => rerender(), (remaining > 0) ? remaining : null);
-
-        const state = (() => {
             if (slot.recipe == BruRecipe.None)
-                return BruRecipe.Stage.Empty;
+                return [0, BruRecipe.Stage.Empty];
 
             if (slot.done < Date.now())
-                return BruRecipe.Stage.Brewed;
+                return [0, BruRecipe.Stage.Brewed];
 
-            if ((elapsed/duration) < 0.4)
-                return BruRecipe.Stage.Brewing0;
+            if (elapsed < brewStop0)
+                return [brewStop0 - elapsed, BruRecipe.Stage.Brewing0];
+            if (elapsed < brewStop1)
+                return [brewStop1 - elapsed, BruRecipe.Stage.Brewing1];
             else
-                return BruRecipe.Stage.Brewing1;
+                return [remaining, BruRecipe.Stage.Brewing2];
         })();
 
+        const timeTilOld = (slot.nu + 200) - Date.now();
+        if ((timeTilOld > 0) && (timeTilOld < untilRerender))
+            untilRerender = timeTilOld;
+
+        useTimeout(rerender, (untilRerender > 0) ? untilRerender : null);
+
         const art = BruRecipe.art(slot.recipe, state);
-        const nu = slot.nu ? "new " : "";
+        const nu = (timeTilOld > 0) ? "new " : "";
 
-        let drink = <img className={"drink " + nu + art}/>;
-        if (state == BruRecipe.Stage.Brewed) {
-            drink = <img
-                className={"drink done " + nu + art}
-                onClick={() => dispatch({
-                    kind: BruEventKind.CollectDrink,
-                    id: slot.id,
-                })}
-            />
+        switch (state) {
+            case BruRecipe.Stage.Empty:
+                return <img
+                    className={"drink " + art}
+                    onClick={() => dispatch({
+                        kind: BruEventKind.StartDrink,
+                        recipe: BruRecipe.Boba,
+                        id: slot.id,
+                    })}
+                />
+                
+            case BruRecipe.Stage.Brewed:
+                return <img
+                    className={"drink done " + nu + art}
+                    onClick={ev => {
+                        dispatch({
+                            kind: BruEventKind.CollectDrink,
+                            id: slot.id,
+                        });
+                        const box = (ev.target as HTMLElement)
+                            .getBoundingClientRect();
+                        appDispatch({
+                            x: box.x,
+                            y: box.y,
+                        });
+                    }}
+                />
+
+            default:
+                return <img
+                    style={{
+                        '--drink-brew-delay': `${-(Date.now()/1000 % 1)}s`,
+                        '--drink-slide-in-delay': (slot.nu - Date.now()) + 'ms',
+                    }}
+                    className={"drink " + nu + art}
+                />
         }
-
-        return drink;
     }
 
     // function BruStationOutline() {
@@ -124,23 +166,27 @@ function DrinkRow(
 enum BruEventKind {
     BuySpigot,
     CollectDrink,
+    StartDrink,
 }
 type BruEvent = { kind: BruEventKind.BuySpigot } |
-                { kind: BruEventKind.CollectDrink, id: number };
+    { kind: BruEventKind.CollectDrink, id: number } |
+    { kind: BruEventKind.StartDrink, id: number, recipe: BruRecipe }
+    ;
 
 export default function RoomBrewery() {
     const [slots, dispatch] = React.useReducer(
         (slots: BruSlot[], ev: BruEvent) => {
-            slots = slots.map(x => ({ ...x, nu: false }));
 
             switch (ev.kind) {
+
                 case BruEventKind.BuySpigot:
                     return [...slots, {
                         recipe: BruRecipe.None,
                         done: Date.now(),
                         id: slots.length,
-                        nu: true,
+                        nu: Date.now(),
                     }];
+
                 case BruEventKind.CollectDrink:
                     return slots.map(s => {
                         if (s.id == ev.id)
@@ -151,14 +197,28 @@ export default function RoomBrewery() {
                             };
                         return s;
                     });
+
+                case BruEventKind.StartDrink:
+                    return slots.map(s => {
+                        if (s.id == ev.id)
+                            return {
+                                ...s,
+                                nu: Date.now(),
+                                recipe: ev.recipe,
+                                done: Date.now() + BruRecipe.duration(
+                                    ev.recipe
+                                ),
+                            };
+                        return s;
+                    });
             }
         },
         [
             {
-                id: 1,
+                id: 0,
                 recipe: BruRecipe.Boba,
-                done: Date.now()+10_000*Math.random(),
-                nu: true,
+                done: Date.now(),//+BruRecipe.duration(BruRecipe.Boba),
+                nu: Date.now(),
             },
         ]
     ); 
