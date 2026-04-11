@@ -1,0 +1,24 @@
+.room-inventory {
+    .top-row {
+        display: flex;
+        flex-direction: row;
+        margin-top: 0.8rem;
+        margin-left: 1.3rem;
+
+        .labeled-pile {
+            position: relative;
+
+            img {
+                width: 5rem;
+            }
+
+            .quantity {
+                position: absolute;
+                bottom: 0.5rem;
+                left: 50%;
+                font-size: 1.5rem;
+                -webkit-text-stroke: 2px black;
+            }
+        }
+    }
+}
