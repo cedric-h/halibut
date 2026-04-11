@@ -3,7 +3,8 @@
 import 'src/types.d.ts'
 
 import { useTimeout } from 'src/hooks.ts'
-import { AppDispatchContext } from "src/AppDispatchContext.ts"
+import { Item } from 'src/item.ts'
+import { AppEventKind, AppDispatchContext } from "src/AppDispatchContext.ts"
 import React from 'react'
 
 import './RoomBrewery.css'
@@ -107,11 +108,22 @@ function DrinkRow(
             case BruRecipe.Stage.Empty:
                 return <img
                     className={"drink " + art}
-                    onClick={() => dispatch({
-                        kind: BruEventKind.StartDrink,
-                        recipe: BruRecipe.Boba,
-                        id: slot.id,
-                    })}
+                    onClick={ev => {
+                        const box = (ev.target as HTMLElement)
+                            .getBoundingClientRect();
+                        appDispatch({
+                            kind: AppEventKind.FlyingItemIntoFrame,
+                            item: Item.Barnacle,
+                            x: box.x,
+                            y: box.y,
+                        });
+
+                        dispatch({
+                            kind: BruEventKind.StartDrink,
+                            recipe: BruRecipe.Boba,
+                            id: slot.id,
+                        });
+                    }}
                 />
                 
             case BruRecipe.Stage.Brewed:
@@ -125,6 +137,8 @@ function DrinkRow(
                         const box = (ev.target as HTMLElement)
                             .getBoundingClientRect();
                         appDispatch({
+                            item: Item.Boba,
+                            kind: AppEventKind.FlyingItemOutOfFrame,
                             x: box.x,
                             y: box.y,
                         });

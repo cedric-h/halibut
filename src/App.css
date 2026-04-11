@@ -5,12 +5,32 @@
     to { scale: 1.1; rotate: 0deg; }
 }
 
-@keyframes drink-collect-kickflip {
+@keyframes out-of-frame-kickflip {
       0% { translate:   0rem   0rem; }
      30% { translate:   2rem  -2rem; }
-    100% { translate: -12rem  12rem; }
+    100% { translate: var(--flying-item-push-x) var(--flying-item-push-y); }
 }
-@keyframes drink-collect-spin {
+@keyframes into-frame-kickflip {
+    0% { translate:   0rem   0rem; }
+    70% {
+        translate:
+            calc(var(--flying-item-push-x) + 0rem)
+            calc(var(--flying-item-push-y) - 2rem)
+            ;
+    }
+    80% {
+        translate:
+            calc(var(--flying-item-push-x) + 0rem)
+            calc(var(--flying-item-push-y) - 2rem)
+            ;
+    }
+    100% { translate: var(--flying-item-push-x) var(--flying-item-push-y); }
+}
+@keyframes flying-item-die {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes flying-item-spin {
     from { rotate: 0deg; }
     50% { rotate: 180deg; }
     to { rotate: 360deg; }
@@ -19,13 +39,15 @@
 .main-content {
     .flying-item {
         width: 1.5rem;
-        content: url('assets/boba.png');
+        content: var(--flying-item-img);
         position: absolute;
         top: 0;
         left: 0;
         animation:
-            1.0s cubic-bezier(0.6, -0.28, 0.74, 0.05) drink-collect-kickflip forwards,
-            0.5s linear 0.3s infinite drink-collect-spin;
+            1.0s cubic-bezier(0.6, -0.28, 0.74, 0.05) var(--flying-item-animation) forwards,
+            var(--flying-item-spin-speed) linear 0.3s infinite flying-item-spin,
+            0.1s linear calc(var(--flying-item-ttl) - 0.1s) flying-item-die forwards 
+            ;
     }
 
     --happy-wobble: 0.2s linear happy-wobble forwards;
